@@ -1,0 +1,8 @@
+1;10234;CERTIFICADO;1;PENDIENTE;Solicito certificado de alumno regular para presentar en el trabajo;2026-10-01;0;
+2;10587;EQUIVALENCIA;2;EN_REVISION;Pido equivalencia de Programacion I aprobada en otra universidad;2026-10-03;2;[2026-10-05] PENDIENTE -> EN_REVISION | 
+3;11020;BAJA_MATERIA;3;APROBADA;Necesito dar de baja Matematica II, es urgente por superposicion horaria;2026-10-06;3;[2026-10-07] PENDIENTE -> EN_REVISION | [2026-10-09] EN_REVISION -> APROBADA | 
+4;11345;EXAMEN_ESPECIAL;2;RECHAZADA;Solicito mesa especial de Base de Datos por viaje laboral;2026-10-10;1;[2026-10-12] PENDIENTE -> RECHAZADA | 
+5;11789;OTRO;1;PENDIENTE;Consulta sobre cambio de comision para el segundo cuatrimestre;2026-10-15;0;
+6;10234;EXAMEN_ESPECIAL;3;EN_REVISION;Pido mesa especial urgente por superposicion con otra mesa;2026-10-18;4;[2026-10-20] PENDIENTE -> EN_REVISION | 
+7;10587;CERTIFICADO;2;CERRADA;Certificado de materias aprobadas para tramite de beca;2026-09-20;1;[2026-09-22] PENDIENTE -> EN_REVISION | [2026-09-25] EN_REVISION -> APROBADA | [2026-09-26] APROBADA -> CERRADA | 
+8;11020;EQUIVALENCIA;1;PENDIENTE;Equivalencia parcial de Ingles I cursado en instituto;2026-10-25;2;
