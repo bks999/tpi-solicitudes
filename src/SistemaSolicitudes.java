@@ -447,8 +447,7 @@ public class SistemaSolicitudes {
             }
             br.close();
         } catch (Exception e) {
-            System.out.println("Error al cargar solicitudes");
-            e.printStackTrace();
+            // si no existe el archivo no pasa nada
         }
         try {
             BufferedReader br = new BufferedReader(new FileReader("data/responsables.csv"));
