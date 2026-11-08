@@ -422,7 +422,9 @@ public class SistemaSolicitudes {
             if (s.prioridad == 3 && !s.estado.equals("CERRADA") && !s.estado.equals("RECHAZADA")) urgentes++;
             if (s.idResponsable == 0) sinAsignar++;
         }
-        double promedio = sumaPrioridad / lista.size();
+        double promedio = lista.isEmpty()
+            ? 0.0
+            : (double) sumaPrioridad / lista.size();
 
         String txt = "";
         txt += "========== REPORTE DE SOLICITUDES ==========\n";
