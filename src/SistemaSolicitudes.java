@@ -2,6 +2,9 @@ import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 // Clase principal del sistema
 public class SistemaSolicitudes {
@@ -482,7 +485,9 @@ public class SistemaSolicitudes {
         txt += "Solicitudes de prioridad alta abiertas: " + urgentes + "\n";
         System.out.println(txt);
         try {
-            FileWriter fw = new FileWriter("data/reporte.txt");
+            FileWriter fw = new FileWriter(
+                obtenerCarpetaDatos().resolve("reporte.txt").toFile()
+            );            
             fw.write(txt);
             fw.close();
             System.out.println("Reporte guardado en data/reporte.txt");
@@ -492,8 +497,9 @@ public class SistemaSolicitudes {
     }
 
     public static void cargarDatos() {
+        Path carpetaDatos = obtenerCarpetaDatos();
         try {
-            BufferedReader br = new BufferedReader(new FileReader("data/estudiantes.csv"));
+            BufferedReader br = new BufferedReader(new FileReader(carpetaDatos.resolve("estudiantes.csv").toFile()));
             String linea;
             while ((linea = br.readLine()) != null) {
                 if (linea.trim().equals("")) continue;
@@ -505,7 +511,7 @@ public class SistemaSolicitudes {
             // si no existe el archivo no pasa nada
         }
         try {
-            BufferedReader br = new BufferedReader(new FileReader("data/responsables.csv"));
+            BufferedReader br = new BufferedReader(new FileReader(carpetaDatos.resolve("responsables.csv").toFile()));
             String linea;
             while ((linea = br.readLine()) != null) {
                 if (linea.trim().equals("")) continue;
@@ -521,7 +527,7 @@ public class SistemaSolicitudes {
             resp.add(new Responsable(3, "Paula Herrera", "DEPARTAMENTO_ALUMNOS", "pherrera@facultad.edu.ar"));
         }
         try {
-            BufferedReader br = new BufferedReader(new FileReader("data/solicitudes.csv"));
+            BufferedReader br = new BufferedReader(new FileReader(carpetaDatos.resolve("solicitudes.csv").toFile()));
             String linea;
             while ((linea = br.readLine()) != null) {
                 if (linea.trim().equals("")) continue;
@@ -538,18 +544,19 @@ public class SistemaSolicitudes {
     }
 
     public static void guardarDatos() {
+        Path carpetaDatos = obtenerCarpetaDatos();
         try {
-            PrintWriter pw = new PrintWriter(new FileWriter("data/estudiantes.csv"));
+            PrintWriter pw = new PrintWriter(new FileWriter(carpetaDatos.resolve("estudiantes.csv").toFile()));
             for (Estudiante e : lista2) {
                 pw.println(e.getLegajo() + ";" + e.getNombre() + ";" + e.getApellido() + ";" + e.getEmail() + ";" + e.getCarrera());
             }
             pw.close();
-            pw = new PrintWriter(new FileWriter("data/responsables.csv"));
+            pw = new PrintWriter(new FileWriter(carpetaDatos.resolve("responsables.csv").toFile()));
             for (Responsable r : resp) {
                 pw.println(r.id + ";" + r.nombre + ";" + r.area + ";" + r.email);
             }
             pw.close();
-            pw = new PrintWriter(new FileWriter("data/solicitudes.csv"));
+            pw = new PrintWriter(new FileWriter(carpetaDatos.resolve("solicitudes.csv").toFile()));
             for (Solicitud s : lista) {
                 pw.println(s.id + ";" + s.legajo + ";" + s.tipo + ";" + s.prioridad + ";" + s.estado + ";"
                         + s.descripcion + ";" + s.fecha + ";" + s.idResponsable + ";" + s.observaciones);
@@ -570,4 +577,35 @@ public class SistemaSolicitudes {
         // TODO terminar
         return 0;
     }
+
+    private static Path obtenerCarpetaDatos() {
+        try {
+            Path directorio = Paths.get(
+                SistemaSolicitudes.class
+                    .getProtectionDomain()
+                    .getCodeSource()
+                    .getLocation()
+                    .toURI()
+            ).toAbsolutePath();
+
+            while (directorio != null) {
+                Path carpeta = directorio.resolve("data");
+
+                if (Files.isRegularFile(
+                        carpeta.resolve("solicitudes.csv"))) {
+                    return carpeta;
+                }
+
+                directorio = directorio.getParent();
+            }
+
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                "No se pudo localizar la carpeta de datos", e);
+        }
+
+        throw new IllegalStateException(
+            "No se encontro la carpeta data del proyecto");
+    }
+
 }
