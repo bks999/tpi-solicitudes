@@ -98,15 +98,8 @@ public class SistemaSolicitudes {
             return;
         }
 
-        System.out.print("Prioridad (1=baja, 2=media, 3=alta): ");
-        int p = 0;
-        try {
-            p = Integer.parseInt(sc.nextLine());
-        } catch (Exception ex) {
-            p = 0;
-        }
-        if (p < 1 || p > 3) {
-            System.out.println("Error: prioridad invalida");
+        int p = seleccionarPrioridad();
+        if (p == 0) {
             return;
         }
 
@@ -128,6 +121,24 @@ public class SistemaSolicitudes {
         Solicitud s = crearSolicitud(ultimoId, leg, t, p, "PENDIENTE", d, LocalDate.now().toString(), 0, "");
         lista.add(s);
         System.out.println("Solicitud registrada con ID " + s.id);
+    }
+
+    private static int seleccionarPrioridad() {
+        System.out.print("Prioridad (1=baja, 2=media, 3=alta): ");
+        int p = 0;
+
+        try {
+            p = Integer.parseInt(sc.nextLine());
+        } catch (Exception ex) {
+            p = 0;
+        }
+
+        if (p < 1 || p > 3) {
+            System.out.println("Error: prioridad invalida");
+            return 0;
+        }
+
+        return p;
     }
 
     private static String seleccionarTipoSolicitud() {
