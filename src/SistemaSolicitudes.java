@@ -93,27 +93,8 @@ public class SistemaSolicitudes {
             lista2.add(est);
         }
 
-        System.out.println("Tipo de solicitud:");
-        System.out.println("1. Certificado");
-        System.out.println("2. Equivalencia");
-        System.out.println("3. Baja de materia");
-        System.out.println("4. Mesa de examen especial");
-        System.out.println("5. Otro");
-        System.out.print("Opcion: ");
-        String t = "";
-        int x = 0;
-        try {
-            x = Integer.parseInt(sc.nextLine());
-        } catch (Exception ex) {
-            x = 0;
-        }
-        if (x == 1) t = "CERTIFICADO";
-        else if (x == 2) t = "EQUIVALENCIA";
-        else if (x == 3) t = "BAJA_MATERIA";
-        else if (x == 4) t = "EXAMEN_ESPECIAL";
-        else if (x == 5) t = "OTRO";
-        else {
-            System.out.println("Error: tipo invalido");
+        String t = seleccionarTipoSolicitud();
+        if (t == null) {
             return;
         }
 
@@ -147,6 +128,34 @@ public class SistemaSolicitudes {
         Solicitud s = crearSolicitud(ultimoId, leg, t, p, "PENDIENTE", d, LocalDate.now().toString(), 0, "");
         lista.add(s);
         System.out.println("Solicitud registrada con ID " + s.id);
+    }
+
+    private static String seleccionarTipoSolicitud() {
+        System.out.println("Tipo de solicitud:");
+        System.out.println("1. Certificado");
+        System.out.println("2. Equivalencia");
+        System.out.println("3. Baja de materia");
+        System.out.println("4. Mesa de examen especial");
+        System.out.println("5. Otro");
+        System.out.print("Opcion: ");
+
+    int opcion;
+        try {
+            opcion = Integer.parseInt(sc.nextLine());
+        } catch (Exception e) {
+            opcion = 0;
+        }
+
+        switch (opcion) {
+            case 1: return "CERTIFICADO";
+            case 2: return "EQUIVALENCIA";
+            case 3: return "BAJA_MATERIA";
+            case 4: return "EXAMEN_ESPECIAL";
+            case 5: return "OTRO";
+            default:
+                System.out.println("Error: tipo invalido");
+                return null;
+        }
     }
 
     public static Solicitud crearSolicitud(int id, String legajo, String tipo, int prioridad, String estado,
