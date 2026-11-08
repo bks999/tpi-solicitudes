@@ -378,20 +378,32 @@ public class SistemaSolicitudes {
             }
             System.out.println(c + " resultado(s)");
         } else if (o.equals("5")) {
-            System.out.print("ID responsable (0 = sin asignar): ");
-            int r = 0;
-            try {
-                r = Integer.parseInt(sc.nextLine());
-            } catch (Exception e) {
-            }
-            int c = 0;
-            for (Solicitud s : lista) {
-                if (s.idResponsable == r) {
-                    mostrar(s);
-                    c++;
-                }
-            }
-            System.out.println(c + " resultado(s)");
+    System.out.print("ID responsable (0 = sin asignar): ");
+
+    int idResponsable;
+
+    try {
+        idResponsable = Integer.parseInt(sc.nextLine().trim());
+    } catch (NumberFormatException e) {
+        System.out.println("Error: el ID del responsable debe ser un numero");
+        return;
+    }
+
+    if (idResponsable < 0) {
+        System.out.println("Error: el ID del responsable no puede ser negativo");
+        return;
+    }
+
+    int cantidad = 0;
+
+    for (Solicitud s : lista) {
+        if (s.idResponsable == idResponsable) {
+            mostrar(s);
+            cantidad++;
+        }
+    }
+
+    System.out.println(cantidad + " resultado(s)");
         } else {
             System.out.println("Opcion invalida");
         }
