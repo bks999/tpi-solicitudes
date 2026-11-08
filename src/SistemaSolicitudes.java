@@ -118,9 +118,21 @@ public class SistemaSolicitudes {
         }
 
         ultimoId++;
-        Solicitud s = crearSolicitud(ultimoId, leg, t, p, "PENDIENTE", d, LocalDate.now().toString(), 0, "");
-        lista.add(s);
-        System.out.println("Solicitud registrada con ID " + s.id);
+
+        DatosSolicitud datos = new DatosSolicitud(
+            ultimoId,
+            leg,
+            t,
+            p,
+            "PENDIENTE",
+            d,
+            LocalDate.now().toString(),
+            0,
+            ""
+        );
+
+        Solicitud s = crearSolicitud(datos);        lista.add(s);
+            System.out.println("Solicitud registrada con ID " + s.id);
     }
 
     private static int seleccionarPrioridad() {
@@ -169,10 +181,18 @@ public class SistemaSolicitudes {
         }
     }
 
-    public static Solicitud crearSolicitud(int id, String legajo, String tipo, int prioridad, String estado,
-                                           String descripcion, String fecha, int idResponsable, String observaciones) {
-        Solicitud s = new Solicitud(id, legajo, tipo, prioridad, estado, descripcion, fecha, idResponsable, observaciones);
-        return s;
+    public static Solicitud crearSolicitud(DatosSolicitud datos) {
+        return new Solicitud(
+            datos.id,
+            datos.legajo,
+            datos.tipo,
+            datos.prioridad,
+            datos.estado,
+            datos.descripcion,
+            datos.fecha,
+            datos.idResponsable,
+            datos.observaciones
+        );
     }
 
     public static void cambiarEstado() {
