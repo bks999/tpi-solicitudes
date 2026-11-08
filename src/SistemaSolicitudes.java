@@ -341,16 +341,31 @@ public class SistemaSolicitudes {
             }
             System.out.println(c + " resultado(s)");
         } else if (o.equals("3")) {
-            System.out.print("Prioridad (1-3): ");
-            int p = Integer.parseInt(sc.nextLine());
-            int c = 0;
-            for (Solicitud s : lista) {
-                if (s.prioridad == p) {
-                    mostrar(s);
-                    c++;
-                }
-            }
-            System.out.println(c + " resultado(s)");
+    System.out.print("Prioridad (1-3): ");
+
+    int p;
+
+    try {
+        p = Integer.parseInt(sc.nextLine().trim());
+    } catch (NumberFormatException e) {
+        System.out.println("Error: la prioridad debe ser un numero");
+        return;
+    }
+
+    if (p < 1 || p > 3) {
+        System.out.println("Error: la prioridad debe estar entre 1 y 3");
+        return;
+    }
+
+    int c = 0;
+    for (Solicitud s : lista) {
+        if (s.prioridad == p) {
+            mostrar(s);
+            c++;
+        }
+    }
+
+    System.out.println(c + " resultado(s)");
         } else if (o.equals("4")) {
             System.out.print("Legajo: ");
             String l = sc.nextLine().trim();
