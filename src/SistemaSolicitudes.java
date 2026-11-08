@@ -60,14 +60,14 @@ public class SistemaSolicitudes {
 
     public static void registrarSolicitud() {
         System.out.print("Legajo del estudiante: ");
-        String leg = sc.nextLine().trim();
-        if (leg.equals("") || leg.length() < 4) {
+        String legajo = sc.nextLine().trim();
+        if (legajo.equals("") || legajo.length() < 4) {
             System.out.println("Error: legajo invalido");
             return;
         }
         boolean existe = false;
         for (int i = 0; i < lista2.size(); i++) {
-            if (lista2.get(i).getLegajo().equals(leg)) {
+            if (lista2.get(i).getLegajo().equals(legajo)) {
                 existe = true;
             }
         }
@@ -89,31 +89,31 @@ public class SistemaSolicitudes {
                 System.out.println("Error: email invalido");
                 return;
             }
-            Estudiante est = new Estudiante(leg, n, a, e, c);
+            Estudiante est = new Estudiante(legajo, n, a, e, c);
             lista2.add(est);
         }
 
-        String t = seleccionarTipoSolicitud();
-        if (t == null) {
+        String tipoSolicitud = seleccionarTipoSolicitud();
+        if (tipoSolicitud == null) {
             return;
         }
 
-        int p = seleccionarPrioridad();
-        if (p == 0) {
+        int prioridad = seleccionarPrioridad();
+        if (prioridad == 0) {
             return;
         }
 
         System.out.print("Descripcion: ");
-        String d = sc.nextLine().trim();
-        d = d.replace(";", ",");
-        if (d.length() < 10) {
+        String descripcion = sc.nextLine().trim();
+        descripcion = descripcion.replace(";", ",");
+        if (descripcion.length() < 10) {
             System.out.println("Error: la descripcion debe tener al menos 10 caracteres");
             return;
         }
 
         // si es baja o examen y dice urgente se sube la prioridad
-        if ((t.equals("BAJA_MATERIA") || t.equals("EXAMEN_ESPECIAL")) && d.toLowerCase().contains("urgente")) {
-            p = 3;
+        if ((tipoSolicitud.equals("BAJA_MATERIA") || tipoSolicitud.equals("EXAMEN_ESPECIAL")) && descripcion.toLowerCase().contains("urgente")) {
+            prioridad = 3;
             System.out.println("Aviso: la prioridad se elevo a ALTA por tratarse de un tramite urgente.");
         }
 
@@ -121,11 +121,11 @@ public class SistemaSolicitudes {
 
         DatosSolicitud datos = new DatosSolicitud(
             ultimoId,
-            leg,
-            t,
-            p,
+            legajo,
+            tipoSolicitud,
+            prioridad,
             "PENDIENTE",
-            d,
+            descripcion,
             LocalDate.now().toString(),
             0,
             ""
