@@ -131,7 +131,7 @@ public class SistemaSolicitudes {
             ""
         );
 
-        Solicitud s = crearSolicitud(datos);        lista.add(s);
+        Solicitud s = Solicitud.crearSolicitud(datos);        lista.add(s);
             System.out.println("Solicitud registrada con ID " + s.id);
     }
 
@@ -179,20 +179,6 @@ public class SistemaSolicitudes {
                 System.out.println("Error: tipo invalido");
                 return null;
         }
-    }
-
-    public static Solicitud crearSolicitud(DatosSolicitud datos) {
-        return new Solicitud(
-            datos.id,
-            datos.legajo,
-            datos.tipo,
-            datos.prioridad,
-            datos.estado,
-            datos.descripcion,
-            datos.fecha,
-            datos.idResponsable,
-            datos.observaciones
-        );
     }
 
     public static void cambiarEstado() {
