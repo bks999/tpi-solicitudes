@@ -15,7 +15,6 @@ public class SistemaSolicitudes {
     public static ArrayList<Responsable> resp = new ArrayList<>();
     static Scanner sc = new Scanner(System.in);
     static int ultimoId = 0;
-    static boolean flag = false;
 
     public static void iniciar() {
         try {
@@ -608,17 +607,6 @@ public class SistemaSolicitudes {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    // public static void eliminarSolicitud(int id) {
-    // for (int i = 0; i < lista.size(); i++) {
-    // if (lista.get(i).id == id) lista.remove(i);
-    // }
-    // }
-
-    public static int calcularDiasAbierta(Solicitud s) {
-        // TODO terminar
-        return 0;
     }
 
     private static Path obtenerCarpetaDatos() {
