@@ -18,7 +18,13 @@ public class SistemaSolicitudes {
     static boolean flag = false;
 
     public static void iniciar() {
-        cargarDatos();
+        try {
+            cargarDatos();
+        } catch (IllegalStateException e) {
+            System.out.println(
+                    "Error: no se encontro la carpeta data. Verifique la ubicacion del proyecto.");
+            return;
+        }
         int op = -1;
         while (op != 0) {
             System.out.println("");
