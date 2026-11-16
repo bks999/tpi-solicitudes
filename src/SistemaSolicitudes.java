@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 // Clase principal del sistema
 public class SistemaSolicitudes {
 
+    private static final int PRIORIDAD_INVALIDA = 0;
     public static ArrayList<Solicitud> lista = new ArrayList<>();
     public static ArrayList<Estudiante> lista2 = new ArrayList<>();
     public static ArrayList<Responsable> resp = new ArrayList<>();
@@ -102,7 +103,7 @@ public class SistemaSolicitudes {
         }
 
         int prioridad = seleccionarPrioridad();
-        if (prioridad == 0) {
+        if (prioridad == PRIORIDAD_INVALIDA) {
             return;
         }
 
@@ -151,7 +152,7 @@ public class SistemaSolicitudes {
 
         if (p < 1 || p > 3) {
             System.out.println("Error: prioridad invalida");
-            return 0;
+            return PRIORIDAD_INVALIDA;
         }
 
         return p;
