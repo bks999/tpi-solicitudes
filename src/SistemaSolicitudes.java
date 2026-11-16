@@ -2,19 +2,28 @@ import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 // Clase principal del sistema
 public class SistemaSolicitudes {
 
+    private static final int PRIORIDAD_INVALIDA = 0;
     public static ArrayList<Solicitud> lista = new ArrayList<>();
     public static ArrayList<Estudiante> lista2 = new ArrayList<>();
     public static ArrayList<Responsable> resp = new ArrayList<>();
     static Scanner sc = new Scanner(System.in);
     static int ultimoId = 0;
-    static boolean flag = false;
 
     public static void iniciar() {
-        cargarDatos();
+        try {
+            cargarDatos();
+        } catch (IllegalStateException e) {
+            System.out.println(
+                    "Error: no se encontro la carpeta data. Verifique la ubicacion del proyecto.");
+            return;
+        }
         int op = -1;
         while (op != 0) {
             System.out.println("");
@@ -60,14 +69,14 @@ public class SistemaSolicitudes {
 
     public static void registrarSolicitud() {
         System.out.print("Legajo del estudiante: ");
-        String leg = sc.nextLine().trim();
-        if (leg.equals("") || leg.length() < 4) {
+        String legajo = sc.nextLine().trim();
+        if (legajo.equals("") || legajo.length() < 4) {
             System.out.println("Error: legajo invalido");
             return;
         }
         boolean existe = false;
         for (int i = 0; i < lista2.size(); i++) {
-            if (lista2.get(i).getLegajo().equals(leg)) {
+            if (lista2.get(i).getLegajo().equals(legajo)) {
                 existe = true;
             }
         }
@@ -89,10 +98,72 @@ public class SistemaSolicitudes {
                 System.out.println("Error: email invalido");
                 return;
             }
-            Estudiante est = new Estudiante(leg, n, a, e, c);
+            Estudiante est = new Estudiante(legajo, n, a, e, c);
             lista2.add(est);
         }
 
+        String tipoSolicitud = seleccionarTipoSolicitud();
+        if (tipoSolicitud == null) {
+            return;
+        }
+
+        int prioridad = seleccionarPrioridad();
+        if (prioridad == PRIORIDAD_INVALIDA) {
+            return;
+        }
+
+        System.out.print("Descripcion: ");
+        String descripcion = sc.nextLine().trim();
+        descripcion = descripcion.replace(";", ",");
+        if (descripcion.length() < 10) {
+            System.out.println("Error: la descripcion debe tener al menos 10 caracteres");
+            return;
+        }
+
+        // si es baja o examen y dice urgente se sube la prioridad
+        if ((tipoSolicitud.equals("BAJA_MATERIA") || tipoSolicitud.equals("EXAMEN_ESPECIAL"))
+                && descripcion.toLowerCase().contains("urgente")) {
+            prioridad = 3;
+            System.out.println("Aviso: la prioridad se elevo a ALTA por tratarse de un tramite urgente.");
+        }
+
+        ultimoId++;
+
+        DatosSolicitud datos = new DatosSolicitud(
+                ultimoId,
+                legajo,
+                tipoSolicitud,
+                prioridad,
+                "PENDIENTE",
+                descripcion,
+                LocalDate.now().toString(),
+                0,
+                "");
+
+        Solicitud s = Solicitud.crearSolicitud(datos);
+        lista.add(s);
+        System.out.println("Solicitud registrada con ID " + s.id);
+    }
+
+    private static int seleccionarPrioridad() {
+        System.out.print("Prioridad (1=baja, 2=media, 3=alta): ");
+        int p = 0;
+
+        try {
+            p = Integer.parseInt(sc.nextLine());
+        } catch (Exception ex) {
+            p = 0;
+        }
+
+        if (p < 1 || p > 3) {
+            System.out.println("Error: prioridad invalida");
+            return PRIORIDAD_INVALIDA;
+        }
+
+        return p;
+    }
+
+    private static String seleccionarTipoSolicitud() {
         System.out.println("Tipo de solicitud:");
         System.out.println("1. Certificado");
         System.out.println("2. Equivalencia");
@@ -100,59 +171,29 @@ public class SistemaSolicitudes {
         System.out.println("4. Mesa de examen especial");
         System.out.println("5. Otro");
         System.out.print("Opcion: ");
-        String t = "";
-        int x = 0;
+
+        int opcion;
         try {
-            x = Integer.parseInt(sc.nextLine());
-        } catch (Exception ex) {
-            x = 0;
-        }
-        if (x == 1) t = "CERTIFICADO";
-        else if (x == 2) t = "EQUIVALENCIA";
-        else if (x == 3) t = "BAJA_MATERIA";
-        else if (x == 4) t = "EXAMEN_ESPECIAL";
-        else if (x == 5) t = "OTRO";
-        else {
-            System.out.println("Error: tipo invalido");
-            return;
+            opcion = Integer.parseInt(sc.nextLine());
+        } catch (Exception e) {
+            opcion = 0;
         }
 
-        System.out.print("Prioridad (1=baja, 2=media, 3=alta): ");
-        int p = 0;
-        try {
-            p = Integer.parseInt(sc.nextLine());
-        } catch (Exception ex) {
-            p = 0;
+        switch (opcion) {
+            case 1:
+                return "CERTIFICADO";
+            case 2:
+                return "EQUIVALENCIA";
+            case 3:
+                return "BAJA_MATERIA";
+            case 4:
+                return "EXAMEN_ESPECIAL";
+            case 5:
+                return "OTRO";
+            default:
+                System.out.println("Error: tipo invalido");
+                return null;
         }
-        if (p < 1 || p > 3) {
-            System.out.println("Error: prioridad invalida");
-            return;
-        }
-
-        System.out.print("Descripcion: ");
-        String d = sc.nextLine().trim();
-        d = d.replace(";", ",");
-        if (d.length() < 10) {
-            System.out.println("Error: la descripcion debe tener al menos 10 caracteres");
-            return;
-        }
-
-        // si es baja o examen y dice urgente se sube la prioridad
-        if ((t.equals("BAJA_MATERIA") || t.equals("EXAMEN_ESPECIAL")) && d.toLowerCase().contains("urgente")) {
-            p = 3;
-            System.out.println("Aviso: la prioridad se elevo a ALTA por tratarse de un tramite urgente.");
-        }
-
-        ultimoId++;
-        Solicitud s = crearSolicitud(ultimoId, leg, t, p, "PENDIENTE", d, LocalDate.now().toString(), 0, "");
-        lista.add(s);
-        System.out.println("Solicitud registrada con ID " + s.id);
-    }
-
-    public static Solicitud crearSolicitud(int id, String legajo, String tipo, int prioridad, String estado,
-                                           String descripcion, String fecha, int idResponsable, String observaciones) {
-        Solicitud s = new Solicitud(id, legajo, tipo, prioridad, estado, descripcion, fecha, idResponsable, observaciones);
-        return s;
     }
 
     public static void cambiarEstado() {
@@ -228,7 +269,8 @@ public class SistemaSolicitudes {
         }
         Solicitud sol = null;
         for (Solicitud s : lista) {
-            if (s.id == id) sol = s;
+            if (s.id == id)
+                sol = s;
         }
         if (sol == null) {
             System.out.println("No existe la solicitud");
@@ -251,7 +293,8 @@ public class SistemaSolicitudes {
         }
         Responsable r = null;
         for (Responsable rr : resp) {
-            if (rr.id == idR) r = rr;
+            if (rr.id == idR)
+                r = rr;
         }
         if (r == null) {
             System.out.println("No existe el responsable");
@@ -260,12 +303,17 @@ public class SistemaSolicitudes {
 
         // controlar que el area corresponda al tipo
         String areaEsperada = "";
-        if (sol.tipo.equals("CERTIFICADO")) areaEsperada = "BEDELIA";
-        else if (sol.tipo.equals("EQUIVALENCIA")) areaEsperada = "SECRETARIA_ACADEMICA";
-        else if (sol.tipo.equals("BAJA_MATERIA")) areaEsperada = "DEPARTAMENTO_ALUMNOS";
-        else if (sol.tipo.equals("EXAMEN_ESPECIAL")) areaEsperada = "BEDELIA";
+        if (sol.tipo.equals("CERTIFICADO"))
+            areaEsperada = "BEDELIA";
+        else if (sol.tipo.equals("EQUIVALENCIA"))
+            areaEsperada = "SECRETARIA_ACADEMICA";
+        else if (sol.tipo.equals("BAJA_MATERIA"))
+            areaEsperada = "DEPARTAMENTO_ALUMNOS";
+        else if (sol.tipo.equals("EXAMEN_ESPECIAL"))
+            areaEsperada = "BEDELIA";
         if (!areaEsperada.equals("") && !r.area.equals(areaEsperada)) {
-            System.out.print("Atencion: el tipo " + sol.tipo + " corresponde al area " + areaEsperada + ". Asignar igual? (s/n): ");
+            System.out.print("Atencion: el tipo " + sol.tipo + " corresponde al area " + areaEsperada
+                    + ". Asignar igual? (s/n): ");
             String resp2 = sc.nextLine();
             if (!resp2.equalsIgnoreCase("s")) {
                 System.out.println("Asignacion cancelada");
@@ -316,7 +364,21 @@ public class SistemaSolicitudes {
             System.out.println(c + " resultado(s)");
         } else if (o.equals("3")) {
             System.out.print("Prioridad (1-3): ");
-            int p = Integer.parseInt(sc.nextLine());
+
+            int p;
+
+            try {
+                p = Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Error: la prioridad debe ser un numero");
+                return;
+            }
+
+            if (p < 1 || p > 3) {
+                System.out.println("Error: la prioridad debe estar entre 1 y 3");
+                return;
+            }
+
             int c = 0;
             for (Solicitud s : lista) {
                 if (s.prioridad == p) {
@@ -324,6 +386,7 @@ public class SistemaSolicitudes {
                     c++;
                 }
             }
+
             System.out.println(c + " resultado(s)");
         } else if (o.equals("4")) {
             System.out.print("Legajo: ");
@@ -338,19 +401,31 @@ public class SistemaSolicitudes {
             System.out.println(c + " resultado(s)");
         } else if (o.equals("5")) {
             System.out.print("ID responsable (0 = sin asignar): ");
-            int r = 0;
+
+            int idResponsable;
+
             try {
-                r = Integer.parseInt(sc.nextLine());
-            } catch (Exception e) {
+                idResponsable = Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Error: el ID del responsable debe ser un numero");
+                return;
             }
-            int c = 0;
+
+            if (idResponsable < 0) {
+                System.out.println("Error: el ID del responsable no puede ser negativo");
+                return;
+            }
+
+            int cantidad = 0;
+
             for (Solicitud s : lista) {
-                if (s.idResponsable == r) {
+                if (s.idResponsable == idResponsable) {
                     mostrar(s);
-                    c++;
+                    cantidad++;
                 }
             }
-            System.out.println(c + " resultado(s)");
+
+            System.out.println(cantidad + " resultado(s)");
         } else {
             System.out.println("Opcion invalida");
         }
@@ -359,18 +434,24 @@ public class SistemaSolicitudes {
     public static void mostrar(Solicitud s) {
         String nom = "";
         for (Estudiante e : lista2) {
-            if (e.getLegajo().equals(s.legajo)) nom = e.getApellido() + ", " + e.getNombre();
+            if (e.getLegajo().equals(s.legajo))
+                nom = e.getApellido() + ", " + e.getNombre();
         }
         String nomR = "Sin asignar";
         for (Responsable r : resp) {
-            if (r.id == s.idResponsable) nomR = r.nombre;
+            if (r.id == s.idResponsable)
+                nomR = r.nombre;
         }
         String pr = "";
-        if (s.prioridad == 1) pr = "BAJA";
-        else if (s.prioridad == 2) pr = "MEDIA";
-        else if (s.prioridad == 3) pr = "ALTA";
-        System.out.println("#" + s.id + " | " + s.fecha + " | " + s.tipo + " | Prioridad: " + pr + " | Estado: " + s.estado
-                + " | Estudiante: " + nom + " (" + s.legajo + ") | Responsable: " + nomR);
+        if (s.prioridad == 1)
+            pr = "BAJA";
+        else if (s.prioridad == 2)
+            pr = "MEDIA";
+        else if (s.prioridad == 3)
+            pr = "ALTA";
+        System.out.println(
+                "#" + s.id + " | " + s.fecha + " | " + s.tipo + " | Prioridad: " + pr + " | Estado: " + s.estado
+                        + " | Estudiante: " + nom + " (" + s.legajo + ") | Responsable: " + nomR);
         System.out.println("    " + s.descripcion);
     }
 
@@ -382,21 +463,35 @@ public class SistemaSolicitudes {
         int sinAsignar = 0;
         for (int i = 0; i < lista.size(); i++) {
             Solicitud s = lista.get(i);
-            if (s.estado.equals("PENDIENTE")) cantPend++;
-            if (s.estado.equals("EN_REVISION")) cantRev++;
-            if (s.estado.equals("APROBADA")) cantAprob++;
-            if (s.estado.equals("RECHAZADA")) cantRech++;
-            if (s.estado.equals("CERRADA")) cantCerr++;
-            if (s.tipo.equals("CERTIFICADO")) cantCert++;
-            if (s.tipo.equals("EQUIVALENCIA")) cantEquiv++;
-            if (s.tipo.equals("BAJA_MATERIA")) cantBaja++;
-            if (s.tipo.equals("EXAMEN_ESPECIAL")) cantExam++;
-            if (s.tipo.equals("OTRO")) cantOtro++;
+            if (s.estado.equals("PENDIENTE"))
+                cantPend++;
+            if (s.estado.equals("EN_REVISION"))
+                cantRev++;
+            if (s.estado.equals("APROBADA"))
+                cantAprob++;
+            if (s.estado.equals("RECHAZADA"))
+                cantRech++;
+            if (s.estado.equals("CERRADA"))
+                cantCerr++;
+            if (s.tipo.equals("CERTIFICADO"))
+                cantCert++;
+            if (s.tipo.equals("EQUIVALENCIA"))
+                cantEquiv++;
+            if (s.tipo.equals("BAJA_MATERIA"))
+                cantBaja++;
+            if (s.tipo.equals("EXAMEN_ESPECIAL"))
+                cantExam++;
+            if (s.tipo.equals("OTRO"))
+                cantOtro++;
             sumaPrioridad = sumaPrioridad + s.prioridad;
-            if (s.prioridad == 3 && !s.estado.equals("CERRADA") && !s.estado.equals("RECHAZADA")) urgentes++;
-            if (s.idResponsable == 0) sinAsignar++;
+            if (s.prioridad == 3 && !s.estado.equals("CERRADA") && !s.estado.equals("RECHAZADA"))
+                urgentes++;
+            if (s.idResponsable == 0)
+                sinAsignar++;
         }
-        double promedio = sumaPrioridad / lista.size();
+        double promedio = lista.isEmpty()
+                ? 0.0
+                : (double) sumaPrioridad / lista.size();
 
         String txt = "";
         txt += "========== REPORTE DE SOLICITUDES ==========\n";
@@ -418,7 +513,8 @@ public class SistemaSolicitudes {
         for (Responsable r : resp) {
             int c = 0;
             for (Solicitud s : lista) {
-                if (s.idResponsable == r.id) c++;
+                if (s.idResponsable == r.id)
+                    c++;
             }
             txt += r.nombre + " (" + r.area + "): " + c + "\n";
         }
@@ -427,7 +523,8 @@ public class SistemaSolicitudes {
         txt += "Solicitudes de prioridad alta abiertas: " + urgentes + "\n";
         System.out.println(txt);
         try {
-            FileWriter fw = new FileWriter("data/reporte.txt");
+            FileWriter fw = new FileWriter(
+                    obtenerCarpetaDatos().resolve("reporte.txt").toFile());
             fw.write(txt);
             fw.close();
             System.out.println("Reporte guardado en data/reporte.txt");
@@ -437,11 +534,13 @@ public class SistemaSolicitudes {
     }
 
     public static void cargarDatos() {
+        Path carpetaDatos = obtenerCarpetaDatos();
         try {
-            BufferedReader br = new BufferedReader(new FileReader("data/estudiantes.csv"));
+            BufferedReader br = new BufferedReader(new FileReader(carpetaDatos.resolve("estudiantes.csv").toFile()));
             String linea;
             while ((linea = br.readLine()) != null) {
-                if (linea.trim().equals("")) continue;
+                if (linea.trim().equals(""))
+                    continue;
                 String[] p = linea.split(";");
                 lista2.add(new Estudiante(p[0], p[1], p[2], p[3], p[4]));
             }
@@ -450,10 +549,11 @@ public class SistemaSolicitudes {
             // si no existe el archivo no pasa nada
         }
         try {
-            BufferedReader br = new BufferedReader(new FileReader("data/responsables.csv"));
+            BufferedReader br = new BufferedReader(new FileReader(carpetaDatos.resolve("responsables.csv").toFile()));
             String linea;
             while ((linea = br.readLine()) != null) {
-                if (linea.trim().equals("")) continue;
+                if (linea.trim().equals(""))
+                    continue;
                 String[] p = linea.split(";");
                 resp.add(new Responsable(Integer.parseInt(p[0]), p[1], p[2], p[3]));
             }
@@ -466,15 +566,17 @@ public class SistemaSolicitudes {
             resp.add(new Responsable(3, "Paula Herrera", "DEPARTAMENTO_ALUMNOS", "pherrera@facultad.edu.ar"));
         }
         try {
-            BufferedReader br = new BufferedReader(new FileReader("data/solicitudes.csv"));
+            BufferedReader br = new BufferedReader(new FileReader(carpetaDatos.resolve("solicitudes.csv").toFile()));
             String linea;
             while ((linea = br.readLine()) != null) {
-                if (linea.trim().equals("")) continue;
+                if (linea.trim().equals(""))
+                    continue;
                 String[] p = linea.split(";", -1);
                 Solicitud s = new Solicitud(Integer.parseInt(p[0]), p[1], p[2], Integer.parseInt(p[3]), p[4],
                         p[5], p[6], Integer.parseInt(p[7]), p[8]);
                 lista.add(s);
-                if (s.id > ultimoId) ultimoId = s.id;
+                if (s.id > ultimoId)
+                    ultimoId = s.id;
             }
             br.close();
         } catch (Exception e) {
@@ -483,18 +585,20 @@ public class SistemaSolicitudes {
     }
 
     public static void guardarDatos() {
+        Path carpetaDatos = obtenerCarpetaDatos();
         try {
-            PrintWriter pw = new PrintWriter(new FileWriter("data/estudiantes.csv"));
+            PrintWriter pw = new PrintWriter(new FileWriter(carpetaDatos.resolve("estudiantes.csv").toFile()));
             for (Estudiante e : lista2) {
-                pw.println(e.getLegajo() + ";" + e.getNombre() + ";" + e.getApellido() + ";" + e.getEmail() + ";" + e.getCarrera());
+                pw.println(e.getLegajo() + ";" + e.getNombre() + ";" + e.getApellido() + ";" + e.getEmail() + ";"
+                        + e.getCarrera());
             }
             pw.close();
-            pw = new PrintWriter(new FileWriter("data/responsables.csv"));
+            pw = new PrintWriter(new FileWriter(carpetaDatos.resolve("responsables.csv").toFile()));
             for (Responsable r : resp) {
                 pw.println(r.id + ";" + r.nombre + ";" + r.area + ";" + r.email);
             }
             pw.close();
-            pw = new PrintWriter(new FileWriter("data/solicitudes.csv"));
+            pw = new PrintWriter(new FileWriter(carpetaDatos.resolve("solicitudes.csv").toFile()));
             for (Solicitud s : lista) {
                 pw.println(s.id + ";" + s.legajo + ";" + s.tipo + ";" + s.prioridad + ";" + s.estado + ";"
                         + s.descripcion + ";" + s.fecha + ";" + s.idResponsable + ";" + s.observaciones);
@@ -505,14 +609,34 @@ public class SistemaSolicitudes {
         }
     }
 
-    // public static void eliminarSolicitud(int id) {
-    //     for (int i = 0; i < lista.size(); i++) {
-    //         if (lista.get(i).id == id) lista.remove(i);
-    //     }
-    // }
+    private static Path obtenerCarpetaDatos() {
+        try {
+            Path directorio = Paths.get(
+                    SistemaSolicitudes.class
+                            .getProtectionDomain()
+                            .getCodeSource()
+                            .getLocation()
+                            .toURI())
+                    .toAbsolutePath();
 
-    public static int calcularDiasAbierta(Solicitud s) {
-        // TODO terminar
-        return 0;
+            while (directorio != null) {
+                Path carpeta = directorio.resolve("data");
+
+                if (Files.isRegularFile(
+                        carpeta.resolve("solicitudes.csv"))) {
+                    return carpeta;
+                }
+
+                directorio = directorio.getParent();
+            }
+
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    "No se pudo localizar la carpeta de datos", e);
+        }
+
+        throw new IllegalStateException(
+                "No se encontro la carpeta data del proyecto");
     }
+
 }

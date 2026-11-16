@@ -21,4 +21,19 @@ public class Solicitud {
         this.idResponsable = idResponsable;
         this.observaciones = observaciones;
     }
+
+    public static Solicitud crearSolicitud(DatosSolicitud datos) {
+        return new Solicitud(
+            datos.id,
+            datos.legajo,
+            datos.tipo,
+            datos.prioridad,
+            datos.estado,
+            datos.descripcion,
+            datos.fecha,
+            datos.idResponsable,
+            datos.observaciones
+        );
+    }
+
 }
